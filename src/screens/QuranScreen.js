@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 
 const QuranScreen = () => {
-  const [selectedTranslations, setSelectedTranslations] = useState([]);
+  const [selectedTranslations, setSelectedTranslations] = useState(['ansarian']);
+  const [currentAyah, setCurrentAyah] = useState(0);
   const [ayahs, setAyahs] = useState([]);
 
   const translations = [
@@ -18,13 +19,18 @@ const QuranScreen = () => {
 
   const loadAyahs = () => {
     // TODO: بارگیری ایات از دیتابیس یا API
-    setAyahs([
-      {
-        id: 1,
-        number: 1,
-        text: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
+    const sampleAyahs = Array.from({ length: 96 }, (_, i) => ({
+      id: i,
+      number: i + 1,
+      text: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
+      translations: {
+        ansarian: 'به نام خدای بخشنده‌ی مهربان',
+        elahi_ghomshei: 'به نام خدای رحمان و رحیم',
+        qorrati: 'به نام پروردگاری که بسیار رحمت‌کار است',
+        makarem: 'به نام خدای بخشندگی‌کننده و مهربان',
       },
-    ]);
+    }));
+    setAyahs(sampleAyahs);
   };
 
   const toggleTranslation = (translationId) => {
@@ -41,6 +47,7 @@ const QuranScreen = () => {
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>سوره واقعه</Text>
+        <Text style={styles.surahInfo}>۹۶ آیت • سوره ۵۶</Text>
       </View>
 
       <View style={styles.translationSelector}>
@@ -71,11 +78,21 @@ const QuranScreen = () => {
       </View>
 
       <View style={styles.ayahsSection}>
-        {ayahs.map(ayah => (
+        {ayahs.slice(0, 5).map(ayah => (
           <View key={ayah.id} style={styles.ayahBox}>
             <Text style={styles.ayahText}>{ayah.text}</Text>
             <Text style={styles.ayahNumber}>({ayah.number})</Text>
-            {/* ترجمه‌های انتخاب‌شده */}
+            
+            {selectedTranslations.map(transId => (
+              <View key={transId} style={styles.translationBox}>
+                <Text style={styles.translationLabel}>
+                  {translations.find(t => t.id === transId)?.name}:
+                </Text>
+                <Text style={styles.translationText}>
+                  {ayah.translations[transId]}
+                </Text>
+              </View>
+            ))}
           </View>
         ))}
       </View>
@@ -89,7 +106,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   header: {
-    backgroundColor: '#2c3e50',
+    backgroundColor: '#1a472a',
     padding: 20,
     alignItems: 'center',
   },
@@ -97,6 +114,11 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: 'bold',
     color: '#ffffff',
+  },
+  surahInfo: {
+    fontSize: 14,
+    color: '#bdc3c7',
+    marginTop: 5,
   },
   translationSelector: {
     backgroundColor: '#ffffff',
@@ -107,8 +129,9 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#2c3e50',
+    color: '#1a472a',
     marginBottom: 10,
+    textAlign: 'right',
   },
   translationButtons: {
     flexDirection: 'row-reverse',
@@ -123,39 +146,63 @@ const styles = StyleSheet.create({
     borderColor: '#bdc3c7',
   },
   transButtonActive: {
-    backgroundColor: '#3498db',
-    borderColor: '#2980b9',
+    backgroundColor: '#27ae60',
+    borderColor: '#229954',
   },
   transButtonText: {
-    color: '#2c3e50',
+    color: '#1a472a',
     fontSize: 12,
   },
   transButtonTextActive: {
     color: '#ffffff',
   },
   ayahsSection: {
-    padding: 15,
+    paddingHorizontal: 15,
+    paddingBottom: 20,
   },
   ayahBox: {
     backgroundColor: '#ffffff',
     padding: 15,
     marginBottom: 10,
     borderRadius: 8,
-    borderRightWidth: 3,
-    borderRightColor: '#3498db',
+    borderRightWidth: 4,
+    borderRightColor: '#27ae60',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
   },
   ayahText: {
-    fontSize: 18,
-    lineHeight: 32,
-    color: '#2c3e50',
+    fontSize: 20,
+    lineHeight: 36,
+    color: '#1a472a',
     textAlign: 'right',
-    fontFamily: 'OthamanTaha',
   },
   ayahNumber: {
     fontSize: 12,
     color: '#95a5a6',
     textAlign: 'center',
-    marginTop: 10,
+    marginVertical: 8,
+  },
+  translationBox: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#ecf0f1',
+  },
+  translationLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#27ae60',
+    marginBottom: 5,
+    textAlign: 'right',
+  },
+  translationText: {
+    fontSize: 14,
+    lineHeight: 24,
+    color: '#555',
+    textAlign: 'right',
   },
 });
 

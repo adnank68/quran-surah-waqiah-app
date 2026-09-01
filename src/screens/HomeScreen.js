@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
-import { PieChart } from 'react-native-chart-kit';
 
 const HomeScreen = () => {
   const [progress, setProgress] = useState(0);
@@ -19,54 +18,46 @@ const HomeScreen = () => {
     setProgress((15 / 30) * 100);
   };
 
-  const chartData = {
-    labels: ['تمام‌شده', 'باقی‌مانده'],
-    datasets: [
-      {
-        data: [progress, 100 - progress],
-      },
-    ],
-    colors: ['#4CAF50', '#E0E0E0'],
-  };
-
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>ختم سوره واقعه</Text>
-        <Text style={styles.subtitle}>برنامه‌ی ختم دوره‌ای</Text>
+        <Text style={styles.title}>خِتم سوره واقعه</Text>
+        <Text style={styles.subtitle}>برنامه‌ی خِتم دوره‌ای</Text>
       </View>
 
       <View style={styles.progressSection}>
-        <Text style={styles.sectionTitle}>پیشرفت ختم</Text>
+        <Text style={styles.sectionTitle}>پیشرفت خِتم</Text>
         <Text style={styles.progressText}>{Math.round(progress)}%</Text>
         <Text style={styles.progressDetails}>
-          {currentDay} روز از {totalDays} روز
+          {currentDay} روز از {totalDays} روز تمام‌شده
         </Text>
       </View>
 
-      <View style={styles.chartSection}>
-        <PieChart
-          data={chartData}
-          width={300}
-          height={300}
-          chartConfig={{
-            backgroundColor: '#ffffff',
-            color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-          }}
-        />
+      <View style={styles.cardGrid}>
+        <TouchableOpacity style={styles.card}>
+          <Text style={styles.cardIcon}>📖</Text>
+          <Text style={styles.cardTitle}>متن سوره</Text>
+          <Text style={styles.cardDesc}>خط عثمان طه</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.card}>
+          <Text style={styles.cardIcon}>📅</Text>
+          <Text style={styles.cardTitle}>برنامه‌ی خِتم</Text>
+          <Text style={styles.cardDesc}>روزانه تیک کنید</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.card}>
+          <Text style={styles.cardIcon}>📊</Text>
+          <Text style={styles.cardTitle}>آمار پیشرفت</Text>
+          <Text style={styles.cardDesc}>نمودار دایره‌ای</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.card}>
+          <Text style={styles.cardIcon}>📚</Text>
+          <Text style={styles.cardTitle}>تفسیر</Text>
+          <Text style={styles.cardDesc}>تفسیر سوره</Text>
+        </TouchableOpacity>
       </View>
-
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>نمایش برنامه‌ی ختم</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>نمایش سوره</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>تفسیر سوره</Text>
-      </TouchableOpacity>
     </ScrollView>
   );
 };
@@ -77,7 +68,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   header: {
-    backgroundColor: '#2c3e50',
+    backgroundColor: '#1a472a',
     padding: 20,
     alignItems: 'center',
     justifyContent: 'center',
@@ -98,42 +89,62 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#2c3e50',
+    color: '#1a472a',
     marginBottom: 10,
   },
   progressText: {
     fontSize: 36,
     fontWeight: 'bold',
-    color: '#4CAF50',
+    color: '#27ae60',
   },
   progressDetails: {
     fontSize: 14,
     color: '#666',
     marginTop: 5,
   },
-  chartSection: {
-    alignItems: 'center',
+  cardGrid: {
+    flexDirection: 'row-reverse',
+    flexWrap: 'wrap',
+    paddingHorizontal: 10,
+  },
+  card: {
+    width: '48%',
     backgroundColor: '#ffffff',
-    margin: 15,
+    marginHorizontal: 5,
+    marginBottom: 15,
+    padding: 15,
     borderRadius: 10,
-    padding: 10,
-  },
-  button: {
-    backgroundColor: '#3498db',
-    marginHorizontal: 15,
-    marginVertical: 8,
-    paddingVertical: 15,
-    borderRadius: 8,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
   },
-  buttonText: {
-    color: '#ffffff',
-    fontSize: 16,
+  cardIcon: {
+    fontSize: 32,
+    marginBottom: 8,
+  },
+  cardTitle: {
+    fontSize: 14,
     fontWeight: '600',
+    color: '#1a472a',
+    textAlign: 'center',
+  },
+  cardDesc: {
+    fontSize: 12,
+    color: '#95a5a6',
+    marginTop: 4,
+    textAlign: 'center',
   },
 });
 
