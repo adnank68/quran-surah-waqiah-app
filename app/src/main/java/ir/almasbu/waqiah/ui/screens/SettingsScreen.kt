@@ -48,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import ir.almasbu.waqiah.BuildConfig
 import ir.almasbu.waqiah.notify.ReminderScheduler
 import ir.almasbu.waqiah.ui.AyahNumberStyle
 import ir.almasbu.waqiah.ui.UiState
@@ -236,6 +237,14 @@ fun SettingsScreen(
           Text(
             text = "این اپ کاملاً آفلاین کار می‌کند و هیچ دسترسی اینترنتی ندارد؛ هیچ داده‌ای از دستگاه شما جایی فرستاده نمی‌شود. برنامه‌ی ختم و تنظیمات فقط روی همین دستگاه ذخیره می‌شود.",
             style = MaterialTheme.typography.bodySmall,
+          )
+          HorizontalDivider()
+          // تا با یک نگاه معلوم باشد کدام نسخه نصب شده است.
+          Text(
+            text = "نسخه‌ی ${PersianNumbers.of(BuildConfig.VERSION_NAME)} " +
+              "(بیلد ${PersianNumbers.of(BuildConfig.VERSION_CODE)})",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.secondary,
           )
         }
       }

@@ -3,6 +3,13 @@ name: Build APK
 on:
   push:
     branches: [main]
+    # کامیت‌هایی که فقط مستندات را عوض می‌کنند APK یکسانی می‌سازند ولی
+    # شماره‌ی انتشار را جلو می‌برند — که باعث شد یک بار نسخه‌ی اشتباه به
+    # دست کاربر برسد. چنین کامیت‌هایی دیگر بیلد نمی‌سازند.
+    paths-ignore:
+      - "**.md"
+      - "مستندات/**"
+      - ".gitignore"
   pull_request:
     branches: [main]
   workflow_dispatch: {}
@@ -46,6 +53,10 @@ jobs:
         run: ./gradlew testDebugUnitTest
 
       - name: Build release APK
+        env:
+          # versionName/versionCode اپ از همین می‌آید، تا هر APK نسخه‌ی یکتا
+          # داشته باشد و کاربر بتواند در «تنظیمات» ببیند چه چیزی نصب کرده.
+          BUILD_NUMBER: ${{ github.run_number }}
         run: ./gradlew assembleRelease
 
       - name: Rename the APK

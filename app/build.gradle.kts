@@ -3,6 +3,11 @@ plugins {
   alias(libs.plugins.kotlin.compose)
 }
 
+// شماره‌ی بیلد از CI می‌آید (`github.run_number`). با `providers` خوانده
+// می‌شود نه `System.getenv`، وگرنه به‌عنوان ورودی configuration cache ردیابی
+// نمی‌شود و یک اجرای بعدی در همان job می‌تواند مقدار کهنه بردارد.
+val buildNumber = providers.environmentVariable("BUILD_NUMBER").orNull?.toIntOrNull() ?: 0
+
 android {
   namespace = "ir.almasbu.waqiah"
   compileSdk { version = release(36) { minorApiLevel = 1 } }
@@ -13,8 +18,12 @@ android {
     applicationId = "ir.almasbu.waqiah"
     minSdk = 24
     targetSdk = 36
-    versionCode = 1
-    versionName = "1.0"
+
+    // هر بیلد باید versionCode یکتا و بزرگ‌تر بگیرد: هم اندروید به‌درستی
+    // «به‌روزرسانی» تشخیص بدهد، هم کاربر بتواند ببیند کدام نسخه را نصب کرده،
+    // هم کافه‌بازار آپدیت با versionCode مساوی یا کمتر را رد نکند.
+    versionCode = buildNumber + 1
+    versionName = "1.0.$buildNumber"
   }
 
   signingConfigs {
@@ -49,6 +58,8 @@ android {
 
   buildFeatures {
     compose = true
+    // برای اینکه اپ بتواند نسخه‌ی خودش را در «تنظیمات» نشان بدهد.
+    buildConfig = true
   }
 
   testOptions {
