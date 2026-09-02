@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.dp
 import ir.almasbu.waqiah.data.Dua
 import ir.almasbu.waqiah.data.KhatmMethod
 import ir.almasbu.waqiah.ui.UiState
-import ir.almasbu.waqiah.ui.components.ArabicText
+import ir.almasbu.waqiah.ui.components.DuaText
 import ir.almasbu.waqiah.ui.components.SectionCard
 import ir.almasbu.waqiah.ui.components.WaqiahTopBar
 import ir.almasbu.waqiah.util.PersianNumbers
@@ -158,13 +158,9 @@ private fun DuaBlock(dua: Dua) {
       style = MaterialTheme.typography.labelLarge,
       color = MaterialTheme.colorScheme.secondary,
     )
-    // دعاها متن پیوسته‌اند نه آیه‌ی مجزا، پس چپ‌وراست‌چین می‌شوند نه وسط‌چین.
-    ArabicText(
-      text = dua.arabic,
-      fontSizeSp = 20f,
-      modifier = Modifier.fillMaxWidth(),
-      align = TextAlign.Start,
-    )
+    // با وزیرمتن، نه خط قرآنی — خط قرآنی فقط برای متن خود قرآن است و
+    // ترکیب‌های بیرون از قرآن را به‌صورت دایره‌ی خالی رندر می‌کند.
+    DuaText(text = dua.arabic, fontSizeSp = 19f)
     if (dua.persian.isNotBlank()) {
       Text(
         text = dua.persian,

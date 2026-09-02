@@ -13,7 +13,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ir.almasbu.waqiah.data.ClosingDua
 
@@ -46,12 +45,9 @@ fun ClosingDuaDialog(dua: ClosingDua, onDismiss: () -> Unit) {
         dua.parts.forEachIndexed { index, part ->
           if (index > 0) HorizontalDivider()
           Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            // دعا متن پیوسته است، پس راست‌چین می‌شود نه وسط‌چین.
-            ArabicText(
-              text = part.arabic,
-              fontSizeSp = 21f,
-              align = TextAlign.Start,
-            )
+            // با وزیرمتن، نه خط قرآنی: رسم‌الخط فارسیِ دعا («یٰا») در فونت
+            // قرآنی لنگر ندارد و به‌جای هر «یٰ» یک دایره‌ی خالی می‌نشست.
+            DuaText(text = part.arabic, fontSizeSp = 19f)
             Text(
               text = part.persian,
               style = MaterialTheme.typography.bodySmall,

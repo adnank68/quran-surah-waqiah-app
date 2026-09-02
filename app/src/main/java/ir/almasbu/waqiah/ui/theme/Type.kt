@@ -46,3 +46,18 @@ fun ayahTextStyle(fontSizeSp: Float) = TextStyle(
   fontSize = fontSizeSp.sp,
   lineHeight = (fontSizeSp * 2.0f).sp,
 )
+
+/**
+ * سبک متن دعاها — عمداً وزیرمتن، نه خط قرآنی.
+ *
+ * فونت KFGQPC فقط برای ترکیب‌هایی ساخته شده که در خودِ قرآن می‌آیند. متن
+ * دعاها رسم‌الخط فارسی دارد و مثلاً دنباله‌ی «ی + الف خنجری» (یٰا) در آن
+ * لنگرِ چسباندن ندارد؛ نتیجه‌اش این بود که رندرر به‌جای هر «یٰ» یک دایره‌ی
+ * خالی می‌گذاشت و کل دعا خراب دیده می‌شد. وزیرمتن این ترکیب‌ها را درست
+ * می‌چیند. **خط قرآنی فقط برای متن قرآن.**
+ */
+fun duaTextStyle(fontSizeSp: Float) = TextStyle(
+  fontFamily = Vazirmatn,
+  fontSize = fontSizeSp.sp,
+  lineHeight = (fontSizeSp * 2.1f).sp,
+)

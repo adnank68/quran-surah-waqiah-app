@@ -141,10 +141,11 @@ class WaqiahContentTest {
   }
 
   @Test
-  fun everyAyahHasAnAudioFileBundled() {
-    // تلاوت آفلاین است: هر ۹۶ آیه باید فایل صوتی خودش را داخل APK داشته باشد.
+  fun everyTrackIncludingBismillahHasAnAudioFileBundled() {
+    // تلاوت آفلاین است: بسم‌الله (۰) و هر ۹۶ آیه باید فایل صوتی خودشان را
+    // داخل APK داشته باشند.
     val assets = ApplicationProvider.getApplicationContext<android.content.Context>().assets
-    (1..96).forEach { n ->
+    (RecitationPlayer.BISMILLAH..RecitationPlayer.LAST_AYAH).forEach { n ->
       val path = RecitationPlayer.assetPathFor(n)
       // `open` به‌جای `openFd` — رفتارش زیر Robolectric قابل‌اتکاتر است و
       // برای «فایل هست و خالی نیست» همین کافی است.
@@ -155,9 +156,23 @@ class WaqiahContentTest {
 
   @Test
   fun audioAssetPathIsZeroPadded() {
+    assertEquals("audio/000.mp3", RecitationPlayer.assetPathFor(RecitationPlayer.BISMILLAH))
     assertEquals("audio/001.mp3", RecitationPlayer.assetPathFor(1))
     assertEquals("audio/007.mp3", RecitationPlayer.assetPathFor(7))
     assertEquals("audio/096.mp3", RecitationPlayer.assetPathFor(96))
+  }
+
+  @Test
+  fun duaTextHasNoUnsupportedPresentationForms() {
+    // «ﮦ» (U+FBA6) در هیچ‌کدام از دو فونت اپ نیست و مربع خالی می‌شود؛
+    // در سند اصلی بود و باید به «ه» عادی تبدیل شده باشد.
+    val allDuaText = buildString {
+      content.closingDua.parts.forEach { append(it.arabic).append(it.persian) }
+      content.khatmMethods.forEach { method ->
+        method.duas.forEach { append(it.arabic).append(it.persian) }
+      }
+    }
+    assertFalse("متن دعا شکل نمایشی پشتیبانی‌نشده دارد", allDuaText.contains('ﮦ'))
   }
 
   @Test

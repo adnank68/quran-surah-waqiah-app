@@ -25,7 +25,10 @@ class RecitationPlayer(context: Context) {
   private val audioManager = appContext.getSystemService(AudioManager::class.java)
 
   data class State(
-    /** شماره‌ی آیه‌ی در حال پخش، یا `null` وقتی چیزی بارگذاری نشده. */
+    /**
+     * قطعه‌ی در حال پخش: `0` یعنی بسم‌الله و `1..96` یعنی همان شماره‌ی آیه.
+     * `null` یعنی چیزی بارگذاری نشده.
+     */
     val ayah: Int? = null,
     val isPlaying: Boolean = false,
     /** وقتی فایل آیه خراب یا غایب باشد، پیام برای نمایش به کاربر. */
@@ -50,9 +53,12 @@ class RecitationPlayer(context: Context) {
     }
   }
 
-  /** پخش از آیه‌ی مشخص شروع می‌شود و تا آخر سوره خودکار ادامه پیدا می‌کند. */
+  /**
+   * پخش از این قطعه شروع می‌شود و تا آخر سوره خودکار ادامه پیدا می‌کند.
+   * [BISMILLAH] (صفر) بسم‌الله را پخش می‌کند و بعد به آیه‌ی ۱ می‌رود.
+   */
   fun playAyah(ayah: Int) {
-    if (ayah !in 1..LAST_AYAH) {
+    if (ayah !in BISMILLAH..LAST_AYAH) {
       stop()
       return
     }
@@ -95,13 +101,13 @@ class RecitationPlayer(context: Context) {
     _state.value = State(ayah = ayah, isPlaying = true)
   }
 
-  /** دکمه‌ی پخش/مکث: از آیه‌ی جاری (یا آیه‌ی ۱) ادامه می‌دهد. */
+  /** دکمه‌ی پخش/مکث: از قطعه‌ی جاری (یا از بسم‌الله) ادامه می‌دهد. */
   fun togglePlayPause() {
     val current = _state.value
     when {
       current.isPlaying -> pause()
       player != null && current.ayah != null -> resume()
-      else -> playAyah(current.ayah ?: 1)
+      else -> playAyah(current.ayah ?: BISMILLAH)
     }
   }
 
@@ -114,7 +120,7 @@ class RecitationPlayer(context: Context) {
   fun resume() {
     val p = player
     if (p == null) {
-      playAyah(_state.value.ayah ?: 1)
+      playAyah(_state.value.ayah ?: BISMILLAH)
       return
     }
     if (!requestFocus()) return
@@ -180,10 +186,15 @@ class RecitationPlayer(context: Context) {
   }
 
   companion object {
+    /** شناسه‌ی قطعه‌ی بسم‌الله، که پیش از آیه‌ی یک پخش می‌شود. */
+    const val BISMILLAH = 0
     const val LAST_AYAH = 96
     private const val TAG = "RecitationPlayer"
 
-    /** مسیر فایل صوتی یک آیه داخل assets — مثلاً آیه‌ی ۷ ← `audio/007.mp3`. */
+    /**
+     * مسیر فایل صوتی داخل assets — بسم‌الله ← `audio/000.mp3` و
+     * آیه‌ی ۷ ← `audio/007.mp3`.
+     */
     fun assetPathFor(ayah: Int): String = "audio/%03d.mp3".format(ayah)
   }
 }

@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ir.almasbu.waqiah.ui.theme.ayahTextStyle
+import ir.almasbu.waqiah.ui.theme.duaTextStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -108,6 +109,25 @@ fun ArabicText(
     style = ayahTextStyle(fontSizeSp),
     color = MaterialTheme.colorScheme.onSurface,
     textAlign = align,
+    modifier = modifier.fillMaxWidth(),
+  )
+}
+
+/**
+ * متن عربیِ دعاها. برخلاف [ArabicText] از خط قرآنی استفاده نمی‌کند —
+ * دلیلش در توضیح `duaTextStyle` آمده.
+ */
+@Composable
+fun DuaText(
+  text: String,
+  modifier: Modifier = Modifier,
+  fontSizeSp: Float = 19f,
+) {
+  Text(
+    text = text,
+    style = duaTextStyle(fontSizeSp),
+    color = MaterialTheme.colorScheme.onSurface,
+    textAlign = TextAlign.Start,
     modifier = modifier.fillMaxWidth(),
   )
 }

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -37,6 +38,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -47,6 +49,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ir.almasbu.waqiah.audio.RecitationPlayer
 import ir.almasbu.waqiah.data.Ayah
 import ir.almasbu.waqiah.data.Translator
 import ir.almasbu.waqiah.ui.AyahNumberStyle
@@ -82,12 +85,19 @@ fun QuranScreen(
   var showDua by remember { mutableStateOf(false) }
   val currentAyah = state.audio.ayah
 
-  // متن همیشه دنبال صوت می‌رود: با عوض‌شدن آیه‌ی در حال تلاوت، لیست خودش
-  // به همان آیه می‌لغزد تا کاربر لازم نباشد دستی اسکرول کند.
+  // متن همیشه دنبال صوت می‌رود: با عوض‌شدن قطعه‌ی در حال تلاوت، لیست خودش
+  // به همان‌جا می‌لغزد تا کاربر لازم نباشد دستی اسکرول کند.
+  // نگاشت: بسم‌الله (۰) ← آیتم ۱، آیه‌ی n ← آیتم n+1.
   LaunchedEffect(currentAyah) {
     if (currentAyah != null) {
-      listState.animateScrollToItem((currentAyah - 1 + ITEMS_BEFORE_AYAT).coerceAtLeast(0))
+      listState.animateScrollToItem(currentAyah + ITEMS_BEFORE_AYAT - 1)
     }
+  }
+
+  // تلاوت فقط تا وقتی است که کاربر در همین صفحه باشد؛ با خروج از صفحه‌ی
+  // سوره، صوت قطع می‌شود و در پس‌زمینه ادامه پیدا نمی‌کند.
+  DisposableEffect(Unit) {
+    onDispose { onStopRecitation() }
   }
 
   val content = state.content
@@ -135,7 +145,12 @@ fun QuranScreen(
       }
 
       item {
-        SectionCard {
+        // بسم‌الله هم صوت خودش را دارد و مثل بقیه با ضربه پخش می‌شود.
+        val isCurrent = currentAyah == RecitationPlayer.BISMILLAH
+        SectionCard(
+          modifier = highlightIfCurrent(isCurrent)
+            .clickable { onPlayFromAyah(RecitationPlayer.BISMILLAH) }
+        ) {
           ArabicText(content.bismillah, BASE_ARABIC_SP * state.arabicFontScale)
         }
       }
@@ -196,7 +211,13 @@ private fun PlayerBar(
     tonalElevation = 3.dp,
     color = MaterialTheme.colorScheme.surface,
   ) {
-    Column(Modifier.fillMaxWidth()) {
+    // بدون این، نوار پخش زیر دکمه‌های ناوبری گوشی می‌افتد و ضربه‌ها به
+    // نوار سیستم می‌رسند نه به دکمه‌ی پخش — یعنی عملاً کار نمی‌کند.
+    Column(
+      Modifier
+        .fillMaxWidth()
+        .navigationBarsPadding()
+    ) {
       HorizontalDivider()
       Row(
         modifier = Modifier
@@ -228,8 +249,8 @@ private fun PlayerBar(
             text = error
               ?: when {
                 currentAyah == null -> "برای شروع، پخش را بزنید یا روی یک آیه ضربه بزنید"
-                isPlaying -> "در حال تلاوت آیه‌ی ${PersianNumbers.of(currentAyah)}"
-                else -> "متوقف روی آیه‌ی ${PersianNumbers.of(currentAyah)}"
+                isPlaying -> "در حال تلاوت ${trackLabel(currentAyah)}"
+                else -> "متوقف روی ${trackLabel(currentAyah)}"
               },
             style = MaterialTheme.typography.bodySmall,
             color = if (error != null) {
@@ -243,6 +264,14 @@ private fun PlayerBar(
     }
   }
 }
+
+/** «بسم‌الله» یا «آیه‌ی ۴۵» — قطعه‌ی صفر بسم‌الله است. */
+private fun trackLabel(track: Int): String =
+  if (track == RecitationPlayer.BISMILLAH) {
+    "بسم‌الله"
+  } else {
+    "آیه‌ی ${PersianNumbers.of(track)}"
+  }
 
 // ——— کنترل‌های نمایش ———
 
@@ -328,17 +357,7 @@ private fun AyahCard(
   isCurrent: Boolean,
   onTap: () -> Unit,
 ) {
-  val highlight = if (isCurrent) {
-    Modifier.border(
-      width = 2.dp,
-      color = MaterialTheme.colorScheme.secondary,
-      shape = RoundedCornerShape(18.dp),
-    )
-  } else {
-    Modifier
-  }
-
-  SectionCard(modifier = highlight.clickable(onClick = onTap)) {
+  SectionCard(modifier = highlightIfCurrent(isCurrent).clickable(onClick = onTap)) {
     when (numberStyle) {
       AyahNumberStyle.BADGE -> {
         AyahBadge("آیه ${PersianNumbers.of(ayah.number)}")
@@ -378,6 +397,19 @@ private fun AyahCard(
     }
   }
 }
+
+/** قابِ طلاییِ دورِ قطعه‌ی در حال تلاوت. */
+@Composable
+private fun highlightIfCurrent(isCurrent: Boolean): Modifier =
+  if (isCurrent) {
+    Modifier.border(
+      width = 2.dp,
+      color = MaterialTheme.colorScheme.secondary,
+      shape = RoundedCornerShape(18.dp),
+    )
+  } else {
+    Modifier
+  }
 
 /** شماره‌ی آیه داخل یک دایره، برای حالت «کنار آیه». */
 @Composable
