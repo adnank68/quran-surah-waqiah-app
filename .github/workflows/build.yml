@@ -38,16 +38,34 @@ jobs:
       - name: Bootstrap Gradle wrapper
         run: gradle wrapper --gradle-version 9.3.1
 
-      - name: Create the debug keystore
-        # روی ماشین توسعه‌ی این پروژه نه JDK هست نه کلید دیباگِ آماده، پس کلید
-        # اینجا ساخته می‌شود. هر دو نوع بیلد فعلاً با همین امضا می‌شوند.
+      - name: Restore the signing keystore
+        # کلید باید بین بیلدها **ثابت** بماند. قبلاً هر اجرا با
+        # `keytool -genkeypair` یک کلید تصادفیِ تازه می‌ساخت، یعنی هر APK
+        # امضای متفاوتی داشت و نصب نسخه‌ی جدید روی نسخه‌ی قبلی با خطای
+        # INSTALL_FAILED_UPDATE_INCOMPATIBLE شکست می‌خورد و کاربر همان
+        # نسخه‌ی قدیمی را می‌دید.
+        #
+        # کلید در secret مخزن نشسته (نه داخل ریپو — ریپو عمومی است). اگر
+        # secret نبود، برای اینکه بیلد نشکند یک کلید موقت ساخته می‌شود، ولی
+        # آن APK روی نصب‌های قبلی نمی‌نشیند.
+        env:
+          DEBUG_KEYSTORE_BASE64: ${{ secrets.DEBUG_KEYSTORE_BASE64 }}
         run: |
-          keytool -genkeypair -v \
-            -keystore debug.keystore \
-            -storepass android -keypass android \
-            -alias androiddebugkey \
-            -keyalg RSA -keysize 2048 -validity 10000 \
-            -dname "CN=Android Debug,O=Android,C=US"
+          if [ -n "$DEBUG_KEYSTORE_BASE64" ]; then
+            echo "$DEBUG_KEYSTORE_BASE64" | base64 -d > debug.keystore
+            echo "کلید ثابت از secret بازیابی شد"
+          else
+            echo "::warning::DEBUG_KEYSTORE_BASE64 تنظیم نشده — کلید موقت ساخته می‌شود و این APK روی نصب‌های قبلی نمی‌نشیند"
+            keytool -genkeypair -v \
+              -keystore debug.keystore \
+              -storepass android -keypass android \
+              -alias androiddebugkey \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -dname "CN=Android Debug,O=Android,C=US"
+          fi
+          # اثر انگشت را چاپ کن تا اگر روزی امضا عوض شد، در لاگ دیده شود
+          keytool -list -v -keystore debug.keystore -storepass android \
+            | grep -i "SHA256:" | head -1
 
       - name: Run unit tests
         run: ./gradlew testDebugUnitTest
