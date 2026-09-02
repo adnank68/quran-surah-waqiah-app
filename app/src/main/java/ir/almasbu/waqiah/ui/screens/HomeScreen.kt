@@ -18,7 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.filled.Star
@@ -243,7 +243,7 @@ private data class NavItem(
 @Composable
 private fun NavGrid(onNavigate: (String) -> Unit, modifier: Modifier = Modifier) {
   val items = listOf(
-    NavItem("متن سوره", "خط عثمان‌طه با ترجمه", Icons.Default.MenuBook, Routes.QURAN),
+    NavItem("متن سوره", "خط عثمان‌طه با ترجمه", Icons.AutoMirrored.Filled.MenuBook, Routes.QURAN),
     NavItem("برنامه‌ی ختم", "تیک روزانه و پیشرفت", Icons.Default.CalendarMonth, Routes.KHATM),
     NavItem("روش‌های ختم", "از منابع معتبر", Icons.Default.TipsAndUpdates, Routes.METHODS),
     NavItem("شأن نزول و فضایل", "روایات و محتوای سوره", Icons.Default.Star, Routes.VIRTUES),
