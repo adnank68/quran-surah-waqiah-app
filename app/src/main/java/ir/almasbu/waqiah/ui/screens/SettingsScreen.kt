@@ -7,6 +7,10 @@ import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,12 +19,16 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -37,12 +45,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import ir.almasbu.waqiah.notify.ReminderScheduler
+import ir.almasbu.waqiah.ui.AyahNumberStyle
 import ir.almasbu.waqiah.ui.UiState
 import ir.almasbu.waqiah.ui.components.SectionCard
 import ir.almasbu.waqiah.ui.components.WaqiahTopBar
+import ir.almasbu.waqiah.ui.theme.BackgroundPalette
+import ir.almasbu.waqiah.ui.theme.ThemeMode
 import ir.almasbu.waqiah.util.PersianNumbers
 
 @Composable
@@ -51,6 +63,9 @@ fun SettingsScreen(
   onBack: () -> Unit,
   onReminderEnabled: (Boolean) -> Unit,
   onReminderTime: (Int, Int) -> Unit,
+  onThemeMode: (ThemeMode) -> Unit,
+  onBackground: (BackgroundPalette) -> Unit,
+  onAyahNumberStyle: (AyahNumberStyle) -> Unit,
 ) {
   val context = LocalContext.current
   var showTimePicker by remember { mutableStateOf(false) }
@@ -86,6 +101,42 @@ fun SettingsScreen(
       contentPadding = PaddingValues(14.dp),
       verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+      item {
+        SectionCard {
+          Text(
+            text = "نمایش",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.primary,
+          )
+
+          Text("حالت روشن یا تیره", style = MaterialTheme.typography.bodyMedium)
+          ChoiceRow(
+            options = ThemeMode.entries.map { it to it.label },
+            selected = state.themeMode,
+            onSelect = onThemeMode,
+          )
+
+          HorizontalDivider()
+
+          Text("رنگ پس‌زمینه", style = MaterialTheme.typography.bodyMedium)
+          ChoiceRow(
+            options = BackgroundPalette.entries.map { it to it.label },
+            selected = state.background,
+            onSelect = onBackground,
+          )
+          ColorPreviewRow(selected = state.background, onSelect = onBackground)
+
+          HorizontalDivider()
+
+          Text("جای شماره‌ی آیه", style = MaterialTheme.typography.bodyMedium)
+          ChoiceRow(
+            options = AyahNumberStyle.entries.map { it to it.label },
+            selected = state.ayahNumberStyle,
+            onSelect = onAyahNumberStyle,
+          )
+        }
+      }
+
       item {
         SectionCard {
           Text(
@@ -223,4 +274,60 @@ private fun TimePickerDialog(
       TextButton(onClick = onDismiss) { Text("انصراف") }
     },
   )
+}
+
+/** ردیف افقی از تراشه‌ها برای انتخاب یکی از چند گزینه. */
+@Composable
+private fun <T> ChoiceRow(
+  options: List<Pair<T, String>>,
+  selected: T,
+  onSelect: (T) -> Unit,
+) {
+  Row(
+    modifier = Modifier.horizontalScroll(rememberScrollState()),
+    horizontalArrangement = Arrangement.spacedBy(8.dp),
+  ) {
+    options.forEach { (value, label) ->
+      FilterChip(
+        selected = value == selected,
+        onClick = { onSelect(value) },
+        label = { Text(label) },
+      )
+    }
+  }
+}
+
+/**
+ * نمونه‌ی رنگ هر پالت، تا کاربر پیش از انتخاب ببیند چه رنگی می‌گیرد.
+ * رنگِ نمونه بر اساس حالت فعلیِ روشن/تیره‌ی خودِ تم انتخاب می‌شود.
+ */
+@Composable
+private fun ColorPreviewRow(
+  selected: BackgroundPalette,
+  onSelect: (BackgroundPalette) -> Unit,
+) {
+  val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
+  Row(
+    modifier = Modifier.horizontalScroll(rememberScrollState()),
+    horizontalArrangement = Arrangement.spacedBy(10.dp),
+  ) {
+    BackgroundPalette.entries.forEach { palette ->
+      val swatch = if (isDark) palette.darkBackground else palette.lightBackground
+      Box(
+        modifier = Modifier
+          .size(38.dp)
+          .background(color = swatch, shape = RoundedCornerShape(50))
+          .border(
+            width = if (palette == selected) 3.dp else 1.dp,
+            color = if (palette == selected) {
+              MaterialTheme.colorScheme.secondary
+            } else {
+              MaterialTheme.colorScheme.outlineVariant
+            },
+            shape = RoundedCornerShape(50),
+          )
+          .clickable { onSelect(palette) },
+      )
+    }
+  }
 }

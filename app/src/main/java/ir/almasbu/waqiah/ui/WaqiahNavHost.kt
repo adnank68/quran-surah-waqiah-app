@@ -42,9 +42,12 @@ fun WaqiahNavHost(viewModel: AppViewModel) {
       QuranScreen(
         state = state,
         onBack = back,
-        onToggleTranslation = { id -> viewModel.toggleTranslation(id) },
+        onSelectTranslation = { id -> viewModel.selectTranslation(id) },
         onArabicScale = { scale -> viewModel.setArabicFontScale(scale) },
         onTranslationScale = { scale -> viewModel.setTranslationFontScale(scale) },
+        onPlayFromAyah = { ayah -> viewModel.playFromAyah(ayah) },
+        onTogglePlayPause = { viewModel.togglePlayPause() },
+        onStopRecitation = { viewModel.stopRecitation() },
       )
     }
     composable(Routes.KHATM) {
@@ -80,6 +83,9 @@ fun WaqiahNavHost(viewModel: AppViewModel) {
         onBack = back,
         onReminderEnabled = { enabled -> viewModel.setReminderEnabled(enabled) },
         onReminderTime = { hour, minute -> viewModel.setReminderTime(hour, minute) },
+        onThemeMode = { mode -> viewModel.setThemeMode(mode) },
+        onBackground = { palette -> viewModel.setBackground(palette) },
+        onAyahNumberStyle = { style -> viewModel.setAyahNumberStyle(style) },
       )
     }
   }

@@ -47,6 +47,17 @@ data class KhatmMethod(
   val total: Int get() = perDay.sum()
 }
 
+/** یک بند از دعای پایان ختم: متن عربی به‌همراه ترجمه‌ی فارسی همان بند. */
+data class DuaPart(val arabic: String, val persian: String)
+
+/** دعایی که بعد از تمام‌شدن تلاوت سوره خوانده می‌شود. */
+data class ClosingDua(
+  val title: String,
+  val subtitle: String,
+  val source: String,
+  val parts: List<DuaPart>,
+)
+
 data class AboutSection(val title: String, val body: String)
 
 data class Virtue(val text: String, val by: String)
@@ -76,5 +87,6 @@ data class WaqiahContent(
   val virtues: List<Virtue>,
   val virtuesSource: String,
   val khatmMethods: List<KhatmMethod>,
+  val closingDua: ClosingDua,
   val sources: List<SourceRef>,
 )

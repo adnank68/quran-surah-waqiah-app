@@ -1,7 +1,9 @@
 package ir.almasbu.waqiah.data
 
 import androidx.test.core.app.ApplicationProvider
+import ir.almasbu.waqiah.audio.RecitationPlayer
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -95,6 +97,67 @@ class WaqiahContentTest {
 
     // ختم یک‌هفته‌ای، طبق منبع مجموعاً ۴۱ مرتبه است
     assertEquals(41, content.khatmMethods.single { it.id == "rizq41" }.total)
+  }
+
+  @Test
+  fun uthmaniTextHasNoCircleMarksLeft() {
+    // U+06DF («صفر گرد کوچک») و U+06DE (رب‌الحزب) روی دستگاه به‌صورت یک
+    // دایره‌ی درشتِ جدا کنار کلمه دیده می‌شدند و باید حذف شده باشند.
+    content.ayat.forEach { ayah ->
+      assertFalse(
+        "آیه ${ayah.number} هنوز نشانه‌ی دایره‌ای دارد: ${ayah.arabic}",
+        ayah.arabic.contains('۟') || ayah.arabic.contains('۞'),
+      )
+    }
+  }
+
+  @Test
+  fun hamzaAlefIsWrittenAsMaddaAlef() {
+    // «ءَا» باید به «آ» تبدیل شده باشد — مثلاً ٱلْءَاخِرِينَ ← ٱلْآخِرِينَ
+    content.ayat.forEach { ayah ->
+      assertFalse(
+        "آیه ${ayah.number} هنوز «ءَا» دارد: ${ayah.arabic}",
+        ayah.arabic.contains("ءَا"),
+      )
+    }
+    // آیه‌های ۱۴، ۴۰، ۴۹ باید حالا «آ» داشته باشند
+    listOf(14, 40, 49).forEach { n ->
+      val ayah = content.ayat.single { it.number == n }
+      assertTrue("آیه $n باید «آ» داشته باشد: ${ayah.arabic}", ayah.arabic.contains('آ'))
+    }
+  }
+
+  @Test
+  fun closingDuaIsCompleteWithTranslations() {
+    val dua = content.closingDua
+    assertTrue(dua.title.isNotBlank())
+    assertTrue(dua.subtitle.isNotBlank())
+    assertTrue(dua.source.isNotBlank())
+    assertTrue("دعای پایان ختم باید بند داشته باشد", dua.parts.isNotEmpty())
+    dua.parts.forEachIndexed { index, part ->
+      assertTrue("بند ${index + 1}: متن عربی خالی", part.arabic.isNotBlank())
+      assertTrue("بند ${index + 1}: ترجمه خالی", part.persian.isNotBlank())
+    }
+  }
+
+  @Test
+  fun everyAyahHasAnAudioFileBundled() {
+    // تلاوت آفلاین است: هر ۹۶ آیه باید فایل صوتی خودش را داخل APK داشته باشد.
+    val assets = ApplicationProvider.getApplicationContext<android.content.Context>().assets
+    (1..96).forEach { n ->
+      val path = RecitationPlayer.assetPathFor(n)
+      // `open` به‌جای `openFd` — رفتارش زیر Robolectric قابل‌اتکاتر است و
+      // برای «فایل هست و خالی نیست» همین کافی است.
+      val size = assets.open(path).use { it.readBytes().size }
+      assertTrue("فایل صوتی $path خیلی کوچک است ($size بایت)", size > 2000)
+    }
+  }
+
+  @Test
+  fun audioAssetPathIsZeroPadded() {
+    assertEquals("audio/001.mp3", RecitationPlayer.assetPathFor(1))
+    assertEquals("audio/007.mp3", RecitationPlayer.assetPathFor(7))
+    assertEquals("audio/096.mp3", RecitationPlayer.assetPathFor(96))
   }
 
   @Test

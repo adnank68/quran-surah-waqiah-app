@@ -7,9 +7,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ir.almasbu.waqiah.ui.AppViewModel
 import ir.almasbu.waqiah.ui.WaqiahNavHost
@@ -23,13 +25,17 @@ class MainActivity : ComponentActivity() {
     super.onCreate(savedInstanceState)
     enableEdgeToEdge()
     setContent {
-      WaqiahTheme {
+      // ViewModel بیرون از WaqiahTheme ساخته می‌شود، چون خودِ تم از وضعیت آن
+      // (حالت روشن/تیره و رنگ پس‌زمینه) خوانده می‌شود.
+      val vm: AppViewModel = viewModel(factory = AppViewModel.Factory)
+      viewModel = vm
+      val state by vm.state.collectAsStateWithLifecycle()
+
+      WaqiahTheme(themeMode = state.themeMode, palette = state.background) {
         // کل اپ فارسی است، پس چیدمان همیشه راست‌به‌چپ می‌ماند و به زبانِ
         // انتخابیِ دستگاه گره نمی‌خورد.
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
           Surface(modifier = Modifier.fillMaxSize()) {
-            val vm: AppViewModel = viewModel(factory = AppViewModel.Factory)
-            viewModel = vm
             WaqiahNavHost(vm)
           }
         }

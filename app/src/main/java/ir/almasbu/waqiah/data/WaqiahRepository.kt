@@ -92,6 +92,16 @@ object WaqiahRepository {
           source = obj.getString("source"),
         )
       },
+      closingDua = root.getJSONObject("closingDua").let { obj ->
+        ClosingDua(
+          title = obj.getString("title"),
+          subtitle = obj.getString("subtitle"),
+          source = obj.getString("source"),
+          parts = obj.getJSONArray("parts").mapObjects {
+            DuaPart(it.getString("ar"), it.getString("fa"))
+          },
+        )
+      },
       sources = root.getJSONArray("sources").mapObjects {
         SourceRef(it.getString("label"), it.getString("value"))
       },
