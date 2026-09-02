@@ -1,30 +1,23 @@
-# Node modules
-node_modules/
-npm-debug.log
-yarn-error.log
-
-# OS
-.DS_Store
-Thumbs.db
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# React Native
+*.iml
 .gradle/
-build/
-.metro-bundler-cache/
-ios/Pods/
-iOS/Pods/
+/local.properties
+/.idea/
+.DS_Store
+/build
+/app/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
 
-# Environment
-.env
-.env.local
-.env.*.local
+# رَپِر گریدل در CI ساخته می‌شود، کامیت نمی‌شود.
+/gradlew
+/gradlew.bat
+/gradle/wrapper/
 
-# Coverage
-coverage/
-.nyc_output/
+# کلید دیباگ هم در CI ساخته می‌شود.
+/debug.keystore
+
+# خروجی‌های موقت
+/out/
+node_modules/

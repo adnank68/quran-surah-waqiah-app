@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- نسخه‌ی ساده‌ی آیکون برای اندروید ۷ (API 24-25) که adaptive-icon ندارد.
+     دستگاه‌های API 26 به بالا نسخه‌ی mipmap-anydpi-v26 را برمی‌دارند. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+  <path
+      android:fillColor="#0B3D2E"
+      android:pathData="M0,0 L108,0 L108,108 L0,108 Z" />
+
+  <path
+      android:fillColor="#00000000"
+      android:strokeColor="#F2D493"
+      android:strokeWidth="3.2"
+      android:pathData="M54,26.5 C63,26.5 69.5,33.5 69.5,42.5 L69.5,79.5 L38.5,79.5 L38.5,42.5 C38.5,33.5 45,26.5 54,26.5 Z" />
+
+  <path
+      android:fillColor="#F2D493"
+      android:pathData="M58.6,44.2 A11.6,11.6 0 1,0 58.6,66.4 A9.1,9.1 0 1,1 58.6,44.2 Z" />
+
+  <path
+      android:fillColor="#F2D493"
+      android:pathData="M46.4,86.6 m-2.6,0 a2.6,2.6 0 1,0 5.2,0 a2.6,2.6 0 1,0 -5.2,0 Z" />
+  <path
+      android:fillColor="#F2D493"
+      android:pathData="M54,86.6 m-2.6,0 a2.6,2.6 0 1,0 5.2,0 a2.6,2.6 0 1,0 -5.2,0 Z" />
+  <path
+      android:fillColor="#F2D493"
+      android:pathData="M61.6,86.6 m-2.6,0 a2.6,2.6 0 1,0 5.2,0 a2.6,2.6 0 1,0 -5.2,0 Z" />
+</vector>
