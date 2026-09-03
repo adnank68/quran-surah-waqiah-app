@@ -48,6 +48,7 @@ fun WaqiahNavHost(viewModel: AppViewModel) {
         onPlayFromAyah = { ayah -> viewModel.playFromAyah(ayah) },
         onTogglePlayPause = { viewModel.togglePlayPause() },
         onStopRecitation = { viewModel.stopRecitation() },
+        onSelectReciter = { reciter -> viewModel.setReciter(reciter) },
       )
     }
     composable(Routes.KHATM) {

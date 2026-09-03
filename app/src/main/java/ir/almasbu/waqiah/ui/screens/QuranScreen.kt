@@ -50,6 +50,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ir.almasbu.waqiah.audio.RecitationPlayer
+import ir.almasbu.waqiah.audio.Reciter
 import ir.almasbu.waqiah.data.Ayah
 import ir.almasbu.waqiah.data.Translator
 import ir.almasbu.waqiah.ui.AyahNumberStyle
@@ -80,6 +81,7 @@ fun QuranScreen(
   onPlayFromAyah: (Int) -> Unit,
   onTogglePlayPause: () -> Unit,
   onStopRecitation: () -> Unit,
+  onSelectReciter: (Reciter) -> Unit,
 ) {
   val listState = rememberLazyListState()
   var showDua by remember { mutableStateOf(false) }
@@ -113,6 +115,7 @@ fun QuranScreen(
           currentAyah = currentAyah,
           isPlaying = state.audio.isPlaying,
           error = state.audio.error,
+          reciter = state.reciter,
           onTogglePlayPause = onTogglePlayPause,
           onStop = onStopRecitation,
         )
@@ -136,9 +139,11 @@ fun QuranScreen(
         Controls(
           translators = content.translators,
           selected = state.selectedTranslation,
+          reciter = state.reciter,
           arabicScale = state.arabicFontScale,
           translationScale = state.translationFontScale,
           onSelectTranslation = onSelectTranslation,
+          onSelectReciter = onSelectReciter,
           onArabicScale = onArabicScale,
           onTranslationScale = onTranslationScale,
         )
@@ -184,7 +189,7 @@ fun QuranScreen(
       item {
         Text(
           text = "با زدن روی هر آیه، تلاوت از همان‌جا شروع می‌شود.\n" +
-            "متن عثمانی از مصحف Tanzil، تلاوت از استاد محمد صدیق منشاوی.",
+            "متن عثمانی از مصحف Tanzil، تلاوت ${state.reciter.displayName}.",
           style = MaterialTheme.typography.bodySmall,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
           textAlign = TextAlign.Center,
@@ -204,6 +209,7 @@ private fun PlayerBar(
   currentAyah: Int?,
   isPlaying: Boolean,
   error: String?,
+  reciter: Reciter,
   onTogglePlayPause: () -> Unit,
   onStop: () -> Unit,
 ) {
@@ -241,7 +247,7 @@ private fun PlayerBar(
 
         Column(Modifier.weight(1f)) {
           Text(
-            text = "تلاوت استاد منشاوی",
+            text = "تلاوت ${reciter.displayName}",
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.secondary,
           )
@@ -279,13 +285,40 @@ private fun trackLabel(track: Int): String =
 private fun Controls(
   translators: List<Translator>,
   selected: String?,
+  reciter: Reciter,
   arabicScale: Float,
   translationScale: Float,
   onSelectTranslation: (String) -> Unit,
+  onSelectReciter: (Reciter) -> Unit,
   onArabicScale: (Float) -> Unit,
   onTranslationScale: (Float) -> Unit,
 ) {
   SectionCard {
+    Text(
+      text = "قاری",
+      style = MaterialTheme.typography.titleSmall,
+      color = MaterialTheme.colorScheme.primary,
+    )
+    Row(
+      modifier = Modifier.horizontalScroll(rememberScrollState()),
+      horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+      Reciter.entries.forEach { option ->
+        FilterChip(
+          selected = option == reciter,
+          onClick = { onSelectReciter(option) },
+          label = { Text(option.displayName) },
+        )
+      }
+    }
+    Text(
+      text = "اگر وسط تلاوت قاری را عوض کنید، از همان آیه با صدای جدید ادامه پیدا می‌کند.",
+      style = MaterialTheme.typography.bodySmall,
+      color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+
+    HorizontalDivider()
+
     Text(
       text = "ترجمه",
       style = MaterialTheme.typography.titleSmall,

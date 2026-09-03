@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import ir.almasbu.waqiah.audio.RecitationPlayer
+import ir.almasbu.waqiah.audio.Reciter
 import ir.almasbu.waqiah.data.AppPrefs
 import ir.almasbu.waqiah.data.KhatmMethod
 import ir.almasbu.waqiah.data.KhatmPlan
@@ -39,6 +40,7 @@ data class UiState(
   val todayJdn: Int = Jalali.todayJdn(),
   /** شناسه‌ی تنها ترجمه‌ی نمایش‌داده‌شده، یا `null` یعنی بدون ترجمه. */
   val selectedTranslation: String? = null,
+  val reciter: Reciter = Reciter.DEFAULT,
   val arabicFontScale: Float = 1f,
   val translationFontScale: Float = 1f,
   val ayahNumberStyle: AyahNumberStyle = AyahNumberStyle.BADGE,
@@ -64,6 +66,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     UiState(
       plan = prefs.plan,
       selectedTranslation = prefs.selectedTranslation,
+      reciter = Reciter.fromId(prefs.reciterId),
       arabicFontScale = prefs.arabicFontScale,
       translationFontScale = prefs.translationFontScale,
       ayahNumberStyle = AyahNumberStyle.fromId(prefs.ayahNumberStyle),
@@ -77,6 +80,8 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
   val state: StateFlow<UiState> = _state.asStateFlow()
 
   init {
+    // پخش‌کننده باید از همان اول قاریِ ذخیره‌شده را بشناسد.
+    player.setReciter(_state.value.reciter)
     viewModelScope.launch {
       // ۱۵۲ کیلوبایت JSON؛ خارج از ریسمان اصلی خوانده می‌شود تا اولین فریم نپرد.
       val content = withContext(Dispatchers.IO) { WaqiahRepository.load(getApplication()) }
@@ -105,6 +110,13 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
   fun playFromAyah(ayah: Int) = player.playAyah(ayah)
 
   fun stopRecitation() = player.stop()
+
+  /** عوض کردن قاری؛ اگر وسط تلاوت باشد، از همان آیه با صدای جدید ادامه می‌دهد. */
+  fun setReciter(reciter: Reciter) {
+    prefs.reciterId = reciter.id
+    _state.update { it.copy(reciter = reciter) }
+    player.setReciter(reciter)
+  }
 
   // ——— برنامه‌ی ختم ———
 

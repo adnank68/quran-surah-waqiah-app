@@ -46,6 +46,11 @@ class AppPrefs(context: Context) {
     get() = prefs.getFloat(KEY_TRANSLATION_SCALE, 1f)
     set(value) = prefs.edit().putFloat(KEY_TRANSLATION_SCALE, value.coerceIn(0.7f, 2f)).apply()
 
+  /** شناسه‌ی قاریِ انتخاب‌شده برای تلاوت. */
+  var reciterId: String
+    get() = prefs.getString(KEY_RECITER, null) ?: DEFAULT_RECITER
+    set(value) = prefs.edit().putString(KEY_RECITER, value).apply()
+
   /** `badge` = شماره بالای آیه، `inline` = شماره کنار آیه. */
   var ayahNumberStyle: String
     get() = prefs.getString(KEY_AYAH_NUMBER_STYLE, null) ?: DEFAULT_AYAH_NUMBER_STYLE
@@ -79,12 +84,14 @@ class AppPrefs(context: Context) {
 
   companion object {
     const val DEFAULT_TRANSLATION = "makarem"
+    const val DEFAULT_RECITER = "minshawi"
     const val DEFAULT_AYAH_NUMBER_STYLE = "badge"
     const val DEFAULT_THEME_MODE = "system"
     const val DEFAULT_BACKGROUND = "default"
 
     private const val KEY_PLAN = "plan"
     private const val KEY_TRANSLATION = "translation"
+    private const val KEY_RECITER = "reciter"
     private const val KEY_ARABIC_SCALE = "arabic_scale"
     private const val KEY_TRANSLATION_SCALE = "translation_scale"
     private const val KEY_AYAH_NUMBER_STYLE = "ayah_number_style"

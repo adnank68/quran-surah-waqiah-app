@@ -2,6 +2,7 @@ package ir.almasbu.waqiah.data
 
 import androidx.test.core.app.ApplicationProvider
 import ir.almasbu.waqiah.audio.RecitationPlayer
+import ir.almasbu.waqiah.audio.Reciter
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -141,25 +142,36 @@ class WaqiahContentTest {
   }
 
   @Test
-  fun everyTrackIncludingBismillahHasAnAudioFileBundled() {
-    // تلاوت آفلاین است: بسم‌الله (۰) و هر ۹۶ آیه باید فایل صوتی خودشان را
-    // داخل APK داشته باشند.
+  fun everyReciterHasEveryTrackIncludingBismillahBundled() {
+    // تلاوت آفلاین است: برای **هر قاری**، بسم‌الله (۰) و هر ۹۶ آیه باید فایل
+    // صوتی خودشان را داخل APK داشته باشند. اگر پوشه‌ی یک قاری ناقص باشد،
+    // پخش وسط سوره می‌ایستد.
     val assets = ApplicationProvider.getApplicationContext<android.content.Context>().assets
-    (RecitationPlayer.BISMILLAH..RecitationPlayer.LAST_AYAH).forEach { n ->
-      val path = RecitationPlayer.assetPathFor(n)
-      // `open` به‌جای `openFd` — رفتارش زیر Robolectric قابل‌اتکاتر است و
-      // برای «فایل هست و خالی نیست» همین کافی است.
-      val size = assets.open(path).use { it.readBytes().size }
-      assertTrue("فایل صوتی $path خیلی کوچک است ($size بایت)", size > 2000)
+    Reciter.entries.forEach { reciter ->
+      (RecitationPlayer.BISMILLAH..RecitationPlayer.LAST_AYAH).forEach { n ->
+        val path = reciter.assetPathFor(n)
+        // `open` به‌جای `openFd` — رفتارش زیر Robolectric قابل‌اتکاتر است و
+        // برای «فایل هست و خالی نیست» همین کافی است.
+        val size = assets.open(path).use { it.readBytes().size }
+        assertTrue("فایل صوتی $path خیلی کوچک است ($size بایت)", size > 2000)
+      }
     }
   }
 
   @Test
-  fun audioAssetPathIsZeroPadded() {
-    assertEquals("audio/000.mp3", RecitationPlayer.assetPathFor(RecitationPlayer.BISMILLAH))
-    assertEquals("audio/001.mp3", RecitationPlayer.assetPathFor(1))
-    assertEquals("audio/007.mp3", RecitationPlayer.assetPathFor(7))
-    assertEquals("audio/096.mp3", RecitationPlayer.assetPathFor(96))
+  fun reciterAssetPathsAreFolderScopedAndZeroPadded() {
+    assertEquals("audio/minshawi/000.mp3", Reciter.MINSHAWI.assetPathFor(RecitationPlayer.BISMILLAH))
+    assertEquals("audio/minshawi/007.mp3", Reciter.MINSHAWI.assetPathFor(7))
+    assertEquals("audio/mansouri/096.mp3", Reciter.MANSOURI.assetPathFor(96))
+
+    // هر قاری باید پوشه‌ی خودش را داشته باشد، وگرنه فایل‌ها روی هم می‌افتند
+    assertEquals(
+      Reciter.entries.size,
+      Reciter.entries.map { it.folder }.toSet().size,
+    )
+    assertEquals(Reciter.MINSHAWI, Reciter.fromId("minshawi"))
+    assertEquals(Reciter.MANSOURI, Reciter.fromId("mansouri"))
+    assertEquals("قاری ناشناخته باید به پیش‌فرض برگردد", Reciter.DEFAULT, Reciter.fromId("nope"))
   }
 
   @Test

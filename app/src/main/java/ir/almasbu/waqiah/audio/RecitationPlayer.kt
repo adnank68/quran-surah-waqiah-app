@@ -41,6 +41,32 @@ class RecitationPlayer(context: Context) {
   private var player: MediaPlayer? = null
   private var focusRequest: AudioFocusRequest? = null
 
+  /**
+   * قاری جاری. پخش‌کننده خودش نگهش می‌دارد چون رفتنِ خودکار به آیه‌ی بعد
+   * داخل `setOnCompletionListener` اتفاق می‌افتد و آنجا باید بداند فایل را از
+   * پوشه‌ی کدام قاری بردارد.
+   */
+  private var reciter: Reciter = Reciter.DEFAULT
+
+  /**
+   * عوض کردن قاری. اگر وسط تلاوت باشد، همان قطعه با صدای قاری جدید از نو
+   * شروع می‌شود؛ اگر مکث کرده باشد، پخش‌کننده آزاد می‌شود تا ادامه‌ی بعدی از
+   * فایل قاری جدید بخواند.
+   */
+  fun setReciter(next: Reciter) {
+    if (next == reciter) return
+    reciter = next
+
+    val current = _state.value
+    val track = current.ayah ?: return
+    if (current.isPlaying) {
+      playAyah(track)
+    } else {
+      releasePlayer()
+      _state.value = current.copy(isPlaying = false, error = null)
+    }
+  }
+
   private val focusListener = AudioManager.OnAudioFocusChangeListener { change ->
     when (change) {
       // تماس ورودی یا اپ دیگری صدا را گرفت: مکث کن، خودکار ادامه نده.
@@ -72,7 +98,7 @@ class RecitationPlayer(context: Context) {
             .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
             .build()
         )
-        appContext.assets.openFd(assetPathFor(ayah)).use { fd ->
+        appContext.assets.openFd(reciter.assetPathFor(ayah)).use { fd ->
           setDataSource(fd.fileDescriptor, fd.startOffset, fd.length)
         }
         setOnCompletionListener {
@@ -190,11 +216,5 @@ class RecitationPlayer(context: Context) {
     const val BISMILLAH = 0
     const val LAST_AYAH = 96
     private const val TAG = "RecitationPlayer"
-
-    /**
-     * مسیر فایل صوتی داخل assets — بسم‌الله ← `audio/000.mp3` و
-     * آیه‌ی ۷ ← `audio/007.mp3`.
-     */
-    fun assetPathFor(ayah: Int): String = "audio/%03d.mp3".format(ayah)
   }
 }
